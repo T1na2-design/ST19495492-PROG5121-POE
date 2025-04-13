@@ -67,7 +67,7 @@ public class LoginTest {
     }
 
     @Test
-    public void testLoginUser_Failure() {//Tests login status when user enters incorect details
+    public void testLoginUser_Failure() {//Tests login status when user enters incorrect details
         Login login = new Login();
         login.registerUser("kyle!!!", "password", "08966553");
         assertFalse(login.loginUser("user123", "password"));
@@ -77,7 +77,7 @@ public class LoginTest {
     public void testReturnLoginStatus_Success() { //Tests login status if user used correct format
         Login login = new Login();
         login.registerUser("kyl_1", "Ch&&sec@ke99!", "+27838968976");
-        assertEquals("Welcome kyl_1, it is great to see you again.", login.returnLoginStatus("kyl_1", "Ch&&sec@ke99!"));
+        assertEquals("Welcome <user>, it is great to see you again.", login.returnLoginStatus("kyl_1", "Ch&&sec@ke99!"));
     }
 
     @Test
