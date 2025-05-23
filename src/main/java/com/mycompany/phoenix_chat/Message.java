@@ -14,38 +14,36 @@ import org.json.JSONObject ;
  */
 public class Message {
 
-    // Tracks number of messages sent
-    private static int messageSentCount = 0;
-    private int numMessages;
+   private static int totalMessagesSent = 0;
+    private int currentMessageCount;
 
     // Message properties
-    private String messageID;
-    private String recipient;
-    private String messageContent;
-    private String messageHash;
+    private String msgID;
+    private String receiverNumber;
+    private String msgText;
+    private String msgHash;
 
     // ✅ Getter for message content
     public String getMessageContent() {
-        return messageContent;
+        return msgText;
     }
 
     // ✅ Constructor
-    public Message(String recipient, String messageContent) {
-       // System.out.println("Recipient received: [" + recipient + "]");
+    public Message(String receiverNumber, String msgText) {
 
-        if (!recipient.matches("\\+27\\d{9}")) {
+        if (!receiverNumber.matches("\\+27\\d{9}")) {
             throw new IllegalArgumentException("Invalid recipient number. Must be 10 digits with international code(+27XXXXXX)");
         }
 
-        if (messageContent.length() > 250) {
+        if (msgText.length() > 250) {
             throw new IllegalArgumentException("Message exceeds 250 characters.");
         }
 
-        this.recipient = recipient.trim();
-        this.messageContent = messageContent;
-        this.messageID = generateMessageID();
-        this.numMessages = ++messageSentCount;
-        this.messageHash = createMessageHash();
+        this.receiverNumber = receiverNumber.trim();
+        this.msgText = msgText;
+        this.msgID = generateMessageID();
+        this.currentMessageCount = ++totalMessagesSent;
+        this.msgHash = createMessageHash();
     }
 
     // ✅ Generate a 9-digit message ID
@@ -57,21 +55,21 @@ public class Message {
 
     // ✅ Validate message ID
     public boolean checkMessageID() {
-        return messageID.length() == 9;
+        return msgID.length() == 9;
     }
 
     // ✅ Validate recipient number (for testing)
-    public boolean checkReciepientCell(String number) {
+    public boolean checkRecipientCell(String number) {
         return number.matches("\\+27\\d{9}");
     }
 
     // ✅ Create hash based on message content and ID
     public String createMessageHash() {
-        String[] words = messageContent.trim().split(" ");
+        String[] words = msgText.trim().split(" ");
         String firstWord = words[0].toUpperCase();
         String lastWord = words[words.length - 1].toUpperCase();
-        String idPrefix = messageID.substring(0, 2);
-        return idPrefix + ":" + numMessages + ":" + firstWord + lastWord;
+        String idPrefix = msgID.substring(0, 2);
+        return idPrefix + ":" + currentMessageCount + ":" + firstWord + lastWord;
     }
 
     // ✅ Provide options when sending a message
@@ -87,23 +85,23 @@ public class Message {
     // ✅ Store message in a JSON object
     public JSONObject storeMessage() {
         JSONObject store = new JSONObject();
-        store.put("messageID", messageID);
-        store.put("messageHash", messageHash);
-        store.put("recipient", recipient);  // 🔄 Removed space typo
-        store.put("message", messageContent);
+        store.put("messageID", msgID);
+        store.put("messageHash", msgHash);
+        store.put("recipient", receiverNumber);
+        store.put("message", msgText);
         return store;
     }
 
     // ✅ Print message info
     public String printMessages() {
-        return "Message ID: " + messageID +
-                "\nMessage Hash: " + messageHash +
-                "\nRecipient: " + recipient +
-                "\nMessage: " + messageContent;
+        return "Message ID: " + msgID +
+                "\nMessage Hash: " + msgHash +
+                "\nRecipient: " + receiverNumber +
+                "\nMessage: " + msgText;
     }
 
     // ✅ Return number of messages sent
     public static int returnTotalMessages() {
-        return messageSentCount;
+        return totalMessagesSent;
     }
 }
