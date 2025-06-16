@@ -17,50 +17,82 @@ public class MainUser {
      */
     public static void main(String[] args) {
         
-       Scanner scanner = new Scanner(System.in);
+      //PART 1
+       LoginClass user = new LoginClass();
 
-        System.out.println("=== User Registration ===");
+       
+        String firstName = JOptionPane.showInputDialog("Enter your First Name:");
+        String lastName = JOptionPane.showInputDialog("Enter your Last Name:");
+        String username = JOptionPane.showInputDialog("Enter a Username (max 5 characters, must contain '_'):");
+        String password = JOptionPane.showInputDialog("Enter a Password (min 8 chars, with uppercase, number, and special character):");
+        String cellNumber = JOptionPane.showInputDialog("Enter Cell Number (e.g., +27831234567):");
 
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine();
+        user.setFirstname(firstName);
+        user.setLastName(lastName);
 
-        System.out.print("Enter password: ");
-        String password = scanner.nextLine();
+        String registerMessage = user.registerUser(username, password, cellNumber);
+        JOptionPane.showMessageDialog(null, registerMessage);
 
-        System.out.print("Enter cell phone number (e.g., +27831234567): ");
-        String cellNumber = scanner.nextLine();
-
-        LoginClass user = new LoginClass();
-
-        if (!user.checkUserName(username)) {
-            System.out.println("Username incorrectly formatted. Must contain an underscore and be no more than 5 characters long.");
-        }
-
-        if (!user.checkPasswordComplexity(password)) {
-            System.out.println("Password does not meet complexity requirements.");
-        }
-
-        if (!user.checkCellPhoneNumber(cellNumber)) {
-            System.out.println("Cell phone number incorrectly formatted. Must start with +27 and be 12 characters long.");
-        }
-
-        if (user.checkUserName(username) && user.checkPasswordComplexity(password) && user.checkCellPhoneNumber(cellNumber)) {
-            System.out.println(user.registerUser(username, password, cellNumber));
-        } else {
-            System.out.println("Registration failed due to incorrect input.");
+        if (!registerMessage.equals("User registered successfully.")) {
+            JOptionPane.showMessageDialog(null, "Registration failed. Exiting...");
             return;
         }
 
-        System.out.println("\n=== User Login ===");
+        JOptionPane.showMessageDialog(null, "=== User Login ===");
 
-        System.out.print("Enter username: ");
-        String loginUsername = scanner.nextLine();
+        String loginUsername = JOptionPane.showInputDialog("Enter your Username to login:");
+        String loginPassword = JOptionPane.showInputDialog("Enter your Password to login:");
 
-        System.out.print("Enter password: ");
-        String loginPassword = scanner.nextLine();
+        String loginStatus = user.returnLoginStatus(loginUsername, loginPassword);
+        JOptionPane.showMessageDialog(null, loginStatus);
+        
+    // PART2
+try {
+    // User inputs recipient's phone number
+    String recipientPhoneNumber = JOptionPane.showInputDialog(null, "Enter recipient Number:");
 
-        user.loginUser(loginUsername, loginPassword);
-        System.out.println(user.returnLoginStatus(username, password));
+    // User inputs message content
+    String messageContent = JOptionPane.showInputDialog(null, "Enter your message (max 250 characters):");
+
+    // Create message object
+    Message message = new Message(recipientPhoneNumber, messageContent);
+
+    // Print message details
+    String messageDetails = message.getMessageDetails();
+    JOptionPane.showMessageDialog(null, "Message Created:\n\n" + messageDetails);
+
+    // Ask user to choose an option for the message
+    String optionInput = JOptionPane.showInputDialog(null, "Select an option:\n1 - Send message\n2 - Delete message\n3 - Store message\nOther - Invalid Option");
+
+    int selectedOption = Integer.parseInt(optionInput);
+    String messageOptionResponse = message.getMessageOption(selectedOption);
+
+    JOptionPane.showMessageDialog(null, messageOptionResponse);
+
+    if (selectedOption == 3) {
+        JSONObject storedMessage = message.toJson();
+        JOptionPane.showMessageDialog(null, "Stored Message:\n" + storedMessage.toString(4)); // Pretty print JSON
+    }
+
+    JOptionPane.showMessageDialog(null, "Total Messages Sent: " + Message.getTotalMessagesCreated());
+    
+    //PART 3
+    ArrayList<Message> allMessages = Message.getAllMessages();
+
+            StringBuilder allMessageDisplay = new StringBuilder("All Messages Sent:\n\n");
+            for (Message m : allMessages) {
+                allMessageDisplay.append(m.getMessageDetails()).append("\n\n");
+            }
+
+            JOptionPane.showMessageDialog(null, allMessageDisplay.toString());
+//---end of part 3 code---
+
+} catch (IllegalArgumentException e) {
+    JOptionPane.showMessageDialog(null, "Error: " + e.getMessage(), "Invalid Input", JOptionPane.ERROR_MESSAGE);
+} catch (Exception e) {
+    JOptionPane.showMessageDialog(null, "Unexpected error: " + e.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+}
+
     }
     }
 
