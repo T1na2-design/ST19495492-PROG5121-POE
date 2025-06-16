@@ -14,68 +14,67 @@ import org.json.JSONObject ;
  */
 public class Message {
 
-    // Tracks number of messages sent
-    private static int messageSentCount = 0;
-    private int numMessages;
+    // Tracks total number of messages created
+    private static int totalMessagesCreated = 0;
+    private int messageSequenceNumber;
+
+    // List to store all message objects
+    private static ArrayList<Message> allMessages = new ArrayList<>();
 
     // Message properties
-    private String messageID;
-    private String recipient;
-    private String messageContent;
-    private String messageHash;
+    private String messageId;
+    private String recipientPhoneNumber;
+    private String content;
+    private String contentHash;
+    private String messageStatus = "SENT"; // Default status is SENT
 
-    // ✅ Getter for message content
-    public String getMessageContent() {
-        return messageContent;
-    }
+    // Constructor
+    public Message(String recipientPhoneNumber, String content) {
 
-    // ✅ Constructor
-    public Message(String recipient, String messageContent) {
-       // System.out.println("Recipient received: [" + recipient + "]");
-
-        if (!recipient.matches("\\+27\\d{9}")) {
-            throw new IllegalArgumentException("Invalid recipient number. Must be 10 digits with international code(+27XXXXXX)");
+        if (!recipientPhoneNumber.matches("\\+27\\d{9}")) {
+            throw new IllegalArgumentException("Invalid recipient number. Must be 10 digits with international code (+27XXXXXXXXX).");
         }
 
-        if (messageContent.length() > 250) {
+        if (content.length() > 250) {
             throw new IllegalArgumentException("Message exceeds 250 characters.");
         }
 
-        this.recipient = recipient.trim();
-        this.messageContent = messageContent;
-        this.messageID = generateMessageID();
-        this.numMessages = ++messageSentCount;
-        this.messageHash = createMessageHash();
+        this.recipientPhoneNumber = recipientPhoneNumber.trim();
+        this.content = content;
+        this.messageId = generateMessageId();
+        this.messageSequenceNumber = ++totalMessagesCreated;
+        this.contentHash = generateContentHash();
+        allMessages.add(this);
     }
 
-    // ✅ Generate a 9-digit message ID
-    private String generateMessageID() {
-        Random rand = new Random();
-        int id = 100000000 + rand.nextInt(900000000);  // Ensures 9 digits
-        return String.valueOf(id);
+    // Generate a 9-digit message ID
+    private String generateMessageId() {
+        Random random = new Random();
+        int randomId = 100000000 + random.nextInt(900000000);  // Ensures 9 digits
+        return String.valueOf(randomId);
     }
 
-    // ✅ Validate message ID
-    public boolean checkMessageID() {
-        return messageID.length() == 9;
+    // Validate message ID
+    public boolean isValidMessageId() {
+        return messageId.length() == 9;
     }
 
-    // ✅ Validate recipient number (for testing)
-    public boolean checkReciepientCell(String number) {
+    // Validate recipient number (for testing)
+    public boolean isValidRecipientNumber(String number) {
         return number.matches("\\+27\\d{9}");
     }
 
-    // ✅ Create hash based on message content and ID
-    public String createMessageHash() {
-        String[] words = messageContent.trim().split(" ");
+    // Create hash based on message content and ID
+    public String generateContentHash() {
+        String[] words = content.trim().split(" ");
         String firstWord = words[0].toUpperCase();
         String lastWord = words[words.length - 1].toUpperCase();
-        String idPrefix = messageID.substring(0, 2);
-        return idPrefix + ":" + numMessages + ":" + firstWord + lastWord;
+        String idPrefix = messageId.substring(0, 2);
+        return idPrefix + ":" + messageSequenceNumber + ":" + firstWord + lastWord;
     }
 
-    // ✅ Provide options when sending a message
-    public String MessageOptions(int option) {
+    // Provide options when sending a message
+    public String getMessageOption(int option) {
         return switch (option) {
             case 1 -> "Message successfully sent.";
             case 2 -> "Press 0 to delete message.";
@@ -84,26 +83,73 @@ public class Message {
         };
     }
 
-    // ✅ Store message in a JSON object
-    public JSONObject storeMessage() {
-        JSONObject store = new JSONObject();
-        store.put("messageID", messageID);
-        store.put("messageHash", messageHash);
-        store.put("recipient", recipient);  // 🔄 Removed space typo
-        store.put("message", messageContent);
-        return store;
+    // Store message in a JSON object
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put("messageId", messageId);
+        json.put("messageHash", contentHash);
+        json.put("recipient", recipientPhoneNumber);
+        json.put("message", content);
+        json.put("status", messageStatus);
+        return json;
     }
 
-    // ✅ Print message info
-    public String printMessages() {
-        return "Message ID: " + messageID +
-                "\nMessage Hash: " + messageHash +
-                "\nRecipient: " + recipient +
-                "\nMessage: " + messageContent;
+    // Print message info
+    public String getMessageDetails() {
+        return "Message ID: " + messageId +
+                "\nMessage Hash: " + contentHash +
+                "\nRecipient: " + recipientPhoneNumber +
+                "\nMessage: " + content +
+                "\nStatus: " + messageStatus;
     }
 
-    // ✅ Return number of messages sent
-    public static int returnTotalMessages() {
-        return messageSentCount;
+    public static ArrayList<Message> getAllMessages() {
+        return allMessages;
+    }
+
+    // Return number of messages sent
+    public static int getTotalMessagesCreated() {
+        return totalMessagesCreated;
+    }
+
+    // Getters
+    public String getContent() {
+        return content;
+    }
+
+    public String getMessageStatus() {
+        return messageStatus;
+    }
+
+    // Set message status with validation
+    public void setMessageStatus(String status) {
+        if (status.equals("SENT") || status.equals("RECEIVED") || status.equals("READ")) {
+            this.messageStatus = status;
+        } else {
+            throw new IllegalArgumentException("Invalid status: must be SENT, RECEIVED, or READ.");
+        }
+    }
+
+    // Boolean getters for easy status checks
+    public boolean isSent() {
+        return "SENT".equals(messageStatus);
+    }
+
+    public boolean isReceived() {
+        return "RECEIVED".equals(messageStatus);
+    }
+
+    public boolean isRead() {
+        return "READ".equals(messageStatus);
+    }
+    
+    //Deletes messages
+    public static boolean deleteMessage(Message message) {
+    boolean removed = allMessages.remove(message);
+    if (removed) {
+        totalMessagesCreated--;  // Optional: decrement total messages count
+    }
+    return removed;
+}
     }
 }
