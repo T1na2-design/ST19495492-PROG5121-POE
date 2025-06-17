@@ -65,6 +65,52 @@ public MessageTest() {}
         assertEquals("Message successfully stored.", msg.MessageOptions(3));
         assertEquals("Invalid option entered.", msg.MessageOptions(99));
     }
+
+    @Test
+    public void testMessageStatusUpdates() {
+        Message message = new Message("+27718693002", "Test message");
+
+        message.setMessageStatus("SENT");
+        assertEquals("SENT", message.getMessageStatus());
+
+        message.setMessageStatus("RECEIVED");
+        assertEquals("RECEIVED", message.getMessageStatus());
+
+        message.setMessageStatus("READ");
+        assertEquals("READ", message.getMessageStatus());
+    }
+
+    @Test
+    public void testInvalidMessageStatus() {
+        Message message = new Message("+27718693002", "Invalid status test");
+        assertThrows(IllegalArgumentException.class, () -> {
+            message.setMessageStatus("DELIVERED"); // Not allowed
+        });
+    }
+
+    @Test
+    public void testDeleteMessage() {
+        Message message = new Message("+27718693002", "Delete me");
+        int sizeBefore = Message.getAllMessages().size();
+
+        boolean deleted = Message.deleteMessage(message);
+        int sizeAfter = Message.getAllMessages().size();
+
+        assertTrue(deleted);
+        assertEquals(sizeBefore - 1, sizeAfter);
+    }
+
+    @Test
+    public void testBooleanFlags() {
+        Message msg = new Message("+27718693002", "Flag test");
+        msg.setSent(true);
+        msg.setReceived(true);
+        msg.setRead(true);
+
+        assertTrue(msg.isSent());
+        assertTrue(msg.isReceived());
+        assertTrue(msg.isRead());
+    }
    
 }
 
